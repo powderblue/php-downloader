@@ -1,0 +1,10 @@
+{
+    "ignoreWords": [
+        "codesniffer",
+        "danbettles",
+        "phpcs",
+        "phpstan",
+        "phpunit",
+        "squizlabs"
+    ]
+}
