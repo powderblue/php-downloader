@@ -1,6 +1,6 @@
 {
     "name": "powderblue/php-downloader",
-    "description": "A super simple wrapper for Wget",
+    "description": "A very simple wrapper for Wget",
     "type": "library",
     "license": "ISC",
     "authors": [
