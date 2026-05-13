@@ -9,6 +9,7 @@ use RuntimeException;
 use SplFileInfo;
 
 use function array_rand;
+use function array_replace;
 use function escapeshellarg;
 use function filter_var;
 use function implode;
@@ -29,6 +30,9 @@ use const null;
 use const PHP_URL_PATH;
 use const true;
 
+/**
+ * @phpstan-type WgetOptionsArray array<string,string>
+ */
 class Downloader
 {
     /**
@@ -52,28 +56,31 @@ class Downloader
      *
      * N.B. Overwrites if there's an existing file with the same pathname
      *
+     * @phpstan-param WgetOptionsArray $wgetOptions
      * @throws WgetDownloadFailedException If it failed to download the specified file
      */
     private static function downloadFile(
         string $fromUrl,
         string $toPathname,
+        array $wgetOptions = [],
     ): void {
         $commandArray = [
             'wget',
         ];
 
-        // phpcs:disable PSR12.ControlStructures.ControlStructureSpacing.FirstExpressionLine
-        // phpcs:disable PSR12.ControlStructures.ControlStructureSpacing.LineIndent
-        // phpcs:disable PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisLine
-        foreach ([
+        $wgetOptions = array_replace([
+            // Overrideable:
+            '--timeout' => '2',  // (Seconds)
+            '--tries' => '3',  // Prevents infinite retries on a failing URL
+            '--no-check-certificate' => '',
+        ], $wgetOptions, [
+            // Not overrideable:
             '--output-document' => escapeshellarg($toPathname),
             '--quiet' => '',
             '--user-agent' => escapeshellarg(self::USER_AGENTS[array_rand(self::USER_AGENTS)]),
-            // Extras:
-            '--timeout' => '2',  // (Seconds)
-            '--no-check-certificate' => '',
-        ] as $name => $value) {
-            // phpcs:enable
+        ]);
+
+        foreach ($wgetOptions as $name => $value) {
             $commandArray[] = '' === $value
                 ? $name
                 : "{$name}={$value}"
@@ -196,12 +203,14 @@ class Downloader
     /**
      * If a destination basename is specified then an existing file will be overwritten
      *
+     * @phpstan-param WgetOptionsArray $wgetOptions
      * @throws InvalidArgumentException If the URL is invalid
      * @throws RuntimeException If the downloaded file is invalid
      */
     public function download(
         string $fromUrl,
         string|null $toBasename = null,
+        array $wgetOptions = [],
     ): SplFileInfo {
         if (!filter_var($fromUrl, FILTER_VALIDATE_URL)) {
             throw new InvalidArgumentException('The URL is invalid');
@@ -212,7 +221,7 @@ class Downloader
             : $this->getDownloadsDir() . "/{$toBasename}"
         ;
 
-        self::downloadFile($fromUrl, $toPathname);
+        self::downloadFile($fromUrl, $toPathname, $wgetOptions);
 
         $whyInvalid = null;
 
