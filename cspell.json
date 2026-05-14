@@ -1,6 +1,7 @@
 {
     "ignoreWords": [
         "codesniffer",
+        "curlopt",
         "danbettles",
         "phpcs",
         "phpstan",

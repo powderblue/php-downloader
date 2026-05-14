@@ -5,8 +5,8 @@
     <file>src/</file>
     <file>tests/</file>
 
-    <arg value="s"/>
     <arg value="p"/>
+    <arg value="s"/>
     <arg name="colors"/>
     <arg name="extensions" value="php"/>
 

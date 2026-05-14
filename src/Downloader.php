@@ -4,15 +4,13 @@ namespace PowderBlue\Downloader;
 
 use InvalidArgumentException;
 use PowderBlue\Downloader\Exception\FileInvalidException;
-use PowderBlue\Downloader\Exception\WgetDownloadFailedException;
+use PowderBlue\Downloader\Strategy\WgetStrategy;
 use RuntimeException;
 use SplFileInfo;
 
 use function array_rand;
-use function array_replace;
 use function escapeshellarg;
 use function filter_var;
-use function implode;
 use function in_array;
 use function is_dir;
 use function is_file;
@@ -31,7 +29,7 @@ use const PHP_URL_PATH;
 use const true;
 
 /**
- * @phpstan-type WgetOptionsArray array<string,string>
+ * @phpstan-import-type GenericOptionsArray from StrategyInterface
  */
 class Downloader
 {
@@ -50,54 +48,6 @@ class Downloader
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
         'Mozilla/5.0 (X11; Linux i686; rv:124.0) Gecko/20100101 Firefox/124.0',
     ];
-
-    /**
-     * Attempts to download the file with path `$fromUrl` to `$toPathname`; throws an exception if it was unsuccessful
-     *
-     * N.B. Overwrites if there's an existing file with the same pathname
-     *
-     * @phpstan-param WgetOptionsArray $wgetOptions
-     * @throws WgetDownloadFailedException If it failed to download the specified file
-     */
-    private static function downloadFile(
-        string $fromUrl,
-        string $toPathname,
-        array $wgetOptions = [],
-    ): void {
-        $commandArray = [
-            'wget',
-        ];
-
-        $wgetOptions = array_replace([
-            // Overrideable:
-            '--timeout' => '2',  // (Seconds)
-            '--tries' => '3',  // Prevents infinite retries on a failing URL
-            '--no-check-certificate' => '',
-        ], $wgetOptions, [
-            // Not overrideable:
-            '--output-document' => escapeshellarg($toPathname),
-            '--quiet' => '',
-            '--user-agent' => escapeshellarg(self::USER_AGENTS[array_rand(self::USER_AGENTS)]),
-        ]);
-
-        foreach ($wgetOptions as $name => $value) {
-            $commandArray[] = '' === $value
-                ? $name
-                : "{$name}={$value}"
-            ;
-        }
-
-        $commandArray[] = escapeshellarg($fromUrl);
-
-        $resultCode = 1;
-        exec(implode(' ', $commandArray), $ignore, $resultCode);
-
-        if (0 !== $resultCode) {
-            unlink($toPathname);
-
-            throw new WgetDownloadFailedException($fromUrl, $toPathname, $resultCode);
-        }
-    }
 
     /**
      * @param string[] $acceptedMimeTypes
@@ -203,7 +153,7 @@ class Downloader
     /**
      * If a destination basename is specified then an existing file will be overwritten
      *
-     * @phpstan-param WgetOptionsArray $wgetOptions
+     * @phpstan-param GenericOptionsArray $wgetOptions
      * @throws InvalidArgumentException If the URL is invalid
      * @throws RuntimeException If the downloaded file is invalid
      */
@@ -221,7 +171,10 @@ class Downloader
             : $this->getDownloadsDir() . "/{$toBasename}"
         ;
 
-        self::downloadFile($fromUrl, $toPathname, $wgetOptions);
+        new WgetStrategy()->downloadFile($fromUrl, $toPathname, [
+            ...$wgetOptions,
+            '--user-agent' => escapeshellarg(self::USER_AGENTS[array_rand(self::USER_AGENTS)]),
+        ]);
 
         $whyInvalid = null;
 
