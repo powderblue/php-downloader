@@ -4,7 +4,7 @@ namespace PowderBlue\Downloader;
 
 use InvalidArgumentException;
 use PowderBlue\Downloader\Exception\FileInvalidException;
-use PowderBlue\Downloader\Strategy\WgetStrategy;
+use PowderBlue\Downloader\Strategy\CurlStrategy;
 use RuntimeException;
 use SplFileInfo;
 
@@ -153,14 +153,14 @@ class Downloader
     /**
      * If a destination basename is specified then an existing file will be overwritten
      *
-     * @phpstan-param GenericOptionsArray $wgetOptions
+     * @phpstan-param GenericOptionsArray $options
      * @throws InvalidArgumentException If the URL is invalid
      * @throws RuntimeException If the downloaded file is invalid
      */
     public function download(
         string $fromUrl,
         string|null $toBasename = null,
-        array $wgetOptions = [],
+        array $options = [],
     ): SplFileInfo {
         if (!filter_var($fromUrl, FILTER_VALIDATE_URL)) {
             throw new InvalidArgumentException('The URL is invalid');
@@ -171,9 +171,9 @@ class Downloader
             : $this->getDownloadsDir() . "/{$toBasename}"
         ;
 
-        new WgetStrategy()->downloadFile($fromUrl, $toPathname, [
-            ...$wgetOptions,
-            '--user-agent' => escapeshellarg(self::USER_AGENTS[array_rand(self::USER_AGENTS)]),
+        new CurlStrategy()->downloadFile($fromUrl, $toPathname, [
+            ...$options,
+            'userAgent' => escapeshellarg(self::USER_AGENTS[array_rand(self::USER_AGENTS)]),
         ]);
 
         $whyInvalid = null;

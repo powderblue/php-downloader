@@ -7,7 +7,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use PowderBlue\Downloader\Downloader;
-use PowderBlue\Downloader\Exception\WgetDownloadFailedException;
+use PowderBlue\Downloader\Exception\DownloadFailedException;
 use ReflectionClass;
 use SplFileInfo;
 
@@ -97,8 +97,8 @@ class DownloaderTest extends TestCase
         $pathnameOfDownloadedFile = "{$fixturesDir}/{$basenameOfDownloadedFile}";
         $urlOfFileToDownload = 'https://picsum.photos/non-existent';
 
-        $this->expectException(WgetDownloadFailedException::class);
-        $this->expectExceptionMessage("Failed to download `{$urlOfFileToDownload}` to `{$pathnameOfDownloadedFile}`: The remote server experienced a problem or rejected our request");
+        $this->expectException(DownloadFailedException::class);
+        $this->expectExceptionMessage("Failed to download `{$urlOfFileToDownload}` to `{$pathnameOfDownloadedFile}`: ");
 
         $downloader = new Downloader($fixturesDir);
         $downloader->download($urlOfFileToDownload, $basenameOfDownloadedFile);

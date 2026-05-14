@@ -1,3 +1,3 @@
 # Downloader
 
-A very simple wrapper for Wget.
+A very simple wrapper for cURL/Wget.

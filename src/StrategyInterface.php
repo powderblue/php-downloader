@@ -2,8 +2,12 @@
 
 namespace PowderBlue\Downloader;
 
+use PowderBlue\Downloader\Exception\DownloadFailedException;
+
 /**
- * @phpstan-type GenericOptionsArray array<string,string>
+ * @phpstan-type GenericOptionsArray array{
+ *   userAgent?: non-empty-string,
+ * }
  */
 interface StrategyInterface
 {
@@ -13,7 +17,7 @@ interface StrategyInterface
      * N.B. Overwrites if there's an existing file with the same pathname
      *
      * @phpstan-param GenericOptionsArray $options
-     * @todo Generic options!
+     * @throws DownloadFailedException If it failed to download the file
      */
     public function downloadFile(
         string $fromUrl,

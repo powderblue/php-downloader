@@ -1,6 +1,6 @@
 {
     "name": "powderblue/php-downloader",
-    "description": "A very simple wrapper for Wget",
+    "description": "A very simple wrapper for cURL/Wget",
     "type": "library",
     "license": "ISC",
     "authors": [
@@ -10,7 +10,8 @@
         }
     ],
     "require": {
-        "php": "^8.5"
+        "php": "^8.5",
+        "ext-curl": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^12.5.4",
