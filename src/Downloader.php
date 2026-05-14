@@ -5,7 +5,6 @@ namespace PowderBlue\Downloader;
 use InvalidArgumentException;
 use PowderBlue\Downloader\Exception\FileInvalidException;
 use PowderBlue\Downloader\Strategy\CurlStrategy;
-use RuntimeException;
 use SplFileInfo;
 
 use function array_rand;
@@ -155,7 +154,7 @@ class Downloader
      *
      * @phpstan-param GenericOptionsArray $options
      * @throws InvalidArgumentException If the URL is invalid
-     * @throws RuntimeException If the downloaded file is invalid
+     * @throws FileInvalidException If the downloaded file is invalid
      */
     public function download(
         string $fromUrl,

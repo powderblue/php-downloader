@@ -34,16 +34,13 @@ class WgetStrategy implements StrategyInterface
         string $toPathname,
         int $resultCode,
     ): DownloadFailedException {
-        $message = "Failed to download `{$fromUrl}` to `{$toPathname}`: "
-            . (self::WGET_ERROR_MESSAGES[$resultCode] ?? "Code {$resultCode}")
-        ;
-
-        return new DownloadFailedException($message);
+        return new DownloadFailedException(
+            $fromUrl,
+            $toPathname,
+            self::WGET_ERROR_MESSAGES[$resultCode] ?? "Result code {$resultCode}",
+        );
     }
 
-    /**
-     * @throws DownloadFailedException If it failed to download the file
-     */
     #[Override]
     public function downloadFile(
         string $fromUrl,

@@ -41,8 +41,6 @@ class CurlStrategy implements StrategyInterface
      * @throws RuntimeException If it failed to open the file for writing
      * @throws RuntimeException If it failed to initialize a cURL session
      * @throws RuntimeException If it failed to set all cURL options
-     * @throws DownloadFailedException If it failed to perform the cURL session
-     * @throws DownloadFailedException If it failed to download the file
      */
     #[Override]
     public function downloadFile(
@@ -85,7 +83,7 @@ class CurlStrategy implements StrategyInterface
             $sessionWasPerformed = curl_exec($ch);
 
             if (false === $sessionWasPerformed) {
-                throw new DownloadFailedException("Failed to perform cURL session for `{$fromUrl}`: " . curl_error($ch));
+                throw new DownloadFailedException($fromUrl, $toPathname, "Failed to perform cURL session: " . curl_error($ch));
             }
 
             /** @var int|false */
@@ -93,7 +91,7 @@ class CurlStrategy implements StrategyInterface
             $requestWasSuccessful = $responseCode >= 200 && $responseCode < 300;
 
             if (!$requestWasSuccessful) {
-                throw new DownloadFailedException("Failed to download `{$fromUrl}` to `{$toPathname}`: response code {$responseCode}");
+                throw new DownloadFailedException($fromUrl, $toPathname, "Response code {$responseCode}");
             }
         } catch (Throwable $t) {
             fclose($fp);
